@@ -9,6 +9,12 @@ RIGHT = 2
 def GetTerminalSize():
     return tuple(map(int, subprocess.check_output(['stty', 'size']).split()))
 
+def sign(x):
+    return 1 if x > 0 else -1 if x < 0 else 0
+
+def WhichLineSide(x, y, x0, y0, x1, y1):
+    return sign((x1 - x0) * (y - y0) - (y1 - y0) * (x - x0))
+
 if __name__ == '__main__':
     print('This is a module!')
 class Figure:
@@ -220,7 +226,10 @@ class Display:
             self.DrawFigure(Line(figure.X1, figure.Y1, figure.X2, figure.Y2, figure.color), state)
             self.DrawFigure(Line(figure.X2, figure.Y2, figure.X0, figure.Y0, figure.color), state)
             if figure.fill:
-                pass
+                for y in range(min(figure.Y0, figure.Y1, figure.Y2), max(figure.Y0, figure.Y1, figure.Y2) + 1):
+                    for x in range(min(figure.X0, figure.X1, figure.X2), max(figure.X0, figure.X1, figure.X2) + 1):
+                        if WhichLineSide(x, y, figure.X0, figure.Y0, figure.X1, figure.Y1) < 1 and WhichLineSide(x, y, figure.X1, figure.Y1, figure.X2, figure.Y2) < 1 and WhichLineSide(x, y, figure.X2, figure.Y2, figure.X0, figure.Y0) < 1:
+                            self.grid[state].Set(x, y, figure.color)
     def Draw(self, state = None):
         if state == None and self.state != None:
             for i in range(self.dim.H):
