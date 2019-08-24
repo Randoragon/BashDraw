@@ -39,6 +39,10 @@ class Point(Figure):
         Figure.__init__(self, color)
         self.X = x
         self.Y = y
+    def __repr__(self):
+        return 'Point{}'.format(self.__str__())
+    def __str__(self):
+        return str((self.X, self.Y))
     def __getitem__(self, key):
         return self.X if key == 0 else self.Y
 
@@ -244,6 +248,10 @@ class Display:
             else:
                 def interp(a, b, t):
                     return a + (b - a) * t
+                def wrapX(p1, p2, p3, t):
+                    return interp(interp(p1.X, p2.X, t), interp(p2.X, p3.X, t), t)
+                def wrapY(p1, p2, p3, t):
+                    return interp(interp(p1.Y, p2.Y, t), interp(p2.Y, p3.Y, t), t)
                 def samecoords(p1, p2):
                     return p1.X == p2.X and p1.Y == p2.Y
                 def adjacent(p1, p2):
@@ -258,8 +266,18 @@ class Display:
                 lastPoint2 = None
                 for i in range(steps + 1):
                     i = i / steps
-                    x = round(interp(interp(figure.P[0].X, figure.P[1].X, i), interp(figure.P[1].X, figure.P[2].X, i), i))
-                    y = round(interp(interp(figure.P[0].Y, figure.P[1].Y, i), interp(figure.P[1].Y, figure.P[2].Y, i), i))
+                    P = figure.P
+                    while len(P) > 2:
+                        P2 = []
+                        for j in range(len(P) - 1):
+                            x = interp(P[j].X, P[j+1].X, i)
+                            y = interp(P[j].Y, P[j+1].Y, i)
+                            P2.append(Point(x, y))
+                        P = P2
+                    x = round(interp(P[0].X, P[1].X, i))
+                    y = round(interp(P[0].Y, P[1].Y, i))
+
+                    # Pixel perfect drawing (compute whether or not delete the previous pixel)
                     if lastPoint != None and lastPoint2 != None and not samecoords(lastPoint, lastPoint2) and not samecoords(Point(x, y), lastPoint):
                         if adjacent(Point(x, y), lastPoint) + adjacent(lastPoint, lastPoint2) == 3:
                             self.DrawFigure(lastPoint, state)
