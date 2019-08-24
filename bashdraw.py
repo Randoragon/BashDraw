@@ -13,7 +13,8 @@ def sign(x):
     return 1 if x > 0 else -1 if x < 0 else 0
 
 def WhichLineSide(x, y, x0, y0, x1, y1):
-    return sign((x1 - x0) * (y - y0) - (y1 - y0) * (x - x0))
+    det = x*y0 + y*x1 + x0*y1 - x1*y0 - y1*x - x0*y
+    return sign(det)
 
 if __name__ == '__main__':
     print('This is a module!')
@@ -228,7 +229,7 @@ class Display:
             if figure.fill:
                 for y in range(min(figure.Y0, figure.Y1, figure.Y2), max(figure.Y0, figure.Y1, figure.Y2) + 1):
                     for x in range(min(figure.X0, figure.X1, figure.X2), max(figure.X0, figure.X1, figure.X2) + 1):
-                        if WhichLineSide(x, y, figure.X0, figure.Y0, figure.X1, figure.Y1) < 1 and WhichLineSide(x, y, figure.X1, figure.Y1, figure.X2, figure.Y2) < 1 and WhichLineSide(x, y, figure.X2, figure.Y2, figure.X0, figure.Y0) < 1:
+                        if WhichLineSide(x, y, figure.X0, figure.Y0, figure.X1, figure.Y1) == WhichLineSide(x, y, figure.X1, figure.Y1, figure.X2, figure.Y2) and WhichLineSide(x, y, figure.X1, figure.Y1, figure.X2, figure.Y2) == WhichLineSide(x, y, figure.X2, figure.Y2, figure.X0, figure.Y0):
                             self.grid[state].Set(x, y, figure.color)
     def Draw(self, state = None):
         if state == None and self.state != None:
