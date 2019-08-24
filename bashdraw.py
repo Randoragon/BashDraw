@@ -238,8 +238,37 @@ class Display:
                         if WhichLineSide(x, y, figure.X0, figure.Y0, figure.X1, figure.Y1) == WhichLineSide(x, y, figure.X1, figure.Y1, figure.X2, figure.Y2) and WhichLineSide(x, y, figure.X1, figure.Y1, figure.X2, figure.Y2) == WhichLineSide(x, y, figure.X2, figure.Y2, figure.X0, figure.Y0):
                             self.grid[state].Set(x, y, figure.color)
         elif isinstance(figure, Chain):
-            for i in range(1, len(figure.P)):
-                self.DrawFigure(Line(figure.P[i-1].X, figure.P[i-1].Y, figure.P[i].X, figure.P[i].Y, figure.color))
+            if not isinstance(figure, Spline):
+                for i in range(1, len(figure.P)):
+                    self.DrawFigure(Line(figure.P[i-1].X, figure.P[i-1].Y, figure.P[i].X, figure.P[i].Y, figure.color), state)
+            else:
+                def interp(a, b, t):
+                    return a + (b - a) * t
+                def samecoords(p1, p2):
+                    return p1.X == p2.X and p1.Y == p2.Y
+                def adjacent(p1, p2):
+                    if abs(p1.X - p2.X) == 1 and p1.Y == p2.Y:
+                        return 1
+                    elif abs(p1.Y - p2.Y) == 1 and p1.X == p2.X:
+                        return 2
+                    else:
+                        return 0
+                steps = self.dim.H * self.dim.W
+                lastPoint = None
+                lastPoint2 = None
+                for i in range(steps + 1):
+                    i = i / steps
+                    x = round(interp(interp(figure.P[0].X, figure.P[1].X, i), interp(figure.P[1].X, figure.P[2].X, i), i))
+                    y = round(interp(interp(figure.P[0].Y, figure.P[1].Y, i), interp(figure.P[1].Y, figure.P[2].Y, i), i))
+                    if lastPoint != None and lastPoint2 != None and not samecoords(lastPoint, lastPoint2) and not samecoords(Point(x, y), lastPoint):
+                        if adjacent(Point(x, y), lastPoint) + adjacent(lastPoint, lastPoint2) == 3:
+                            self.DrawFigure(lastPoint, state)
+                            lastPoint = None
+                    if lastPoint == None or not samecoords(Point(x, y), lastPoint):
+                        if lastPoint2 == None or (lastPoint != None and not samecoords(lastPoint2, lastPoint)):
+                            lastPoint2 = lastPoint
+                        lastPoint = Point(x, y, self.grid[state].Get(x, y))
+                    self.DrawFigure(Point(x, y, figure.color), state)
     def Draw(self, state = None):
         if state == None and self.state != None:
             for i in range(self.dim.H):
@@ -254,9 +283,21 @@ class Display:
                 print('')
         elif state != None:
             for i in range(self.dim.H):
+                if self.align == CENTER:
+                    for j in range((GetTerminalSize()[1] // 2 - self.dim.W) // 2):
+                        bc.printbc('  ', self.color['black'], self.color['blackbg'], end = '')
+                elif self.align == RIGHT:
+                    for j in range(GetTerminalSize()[1] // 2 - self.dim.W):
+                        bc.printbc('  ', self.color['black'], self.color['blackbg'], end= '')
                 for j in range(self.dim.W):
                     bc.printbc('  ', self.color[self.grid[state].Get(j, i)], self.color[self.grid[state].Get(j, i) + 'bg'], end='')
                 print('')
         else:
             raise ValueError('Must specify \'state\' parameter if \'SetState()\' had not been invoked before.')
-
+    def Clear(self, state = None):
+        if state == None and self.state != None:
+            self.DrawFigure(Rectangle(0, 0, self.dim.W, self.dim.H, 'black', True))
+        elif state != None:
+            self.DrawFigure(Rectangle(0, 0, self.dim.W, self.dim.H, 'black', True), state)
+        else:
+            raise ValueError('Must specify \'state\' parameter if \'SetState()\' had not been invoked before.')
