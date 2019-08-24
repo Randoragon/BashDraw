@@ -110,10 +110,16 @@ class Triangle(Figure):
     def FromPoints(cls, a, b, c, fill = True, color = 'black'):
         return cls(a.X, a.Y, b.X, b.Y, c.X, c.Y, fill, color)
 class Chain(Figure):
-    def __init__(self, color, *points):
-        Figure.__init__(self, color)
+    def __init__(self, *args):
+        if len(args) < 2:
+            raise ValueError('At least 2 arguments must be passed: Point1 and Point2.')
+        elif len(args) > 2 and isinstance(args[-1], str):
+            Figure.__init__(self, args[-1])
+            args = args[:-1]
+        else:
+            Figure.__init__(self, 'black')
         self.P = []
-        for i in points:
+        for i in args:
             self.P.append(i)
     def __getitem__(self, key):
         return self.P[key]
@@ -231,6 +237,9 @@ class Display:
                     for x in range(min(figure.X0, figure.X1, figure.X2), max(figure.X0, figure.X1, figure.X2) + 1):
                         if WhichLineSide(x, y, figure.X0, figure.Y0, figure.X1, figure.Y1) == WhichLineSide(x, y, figure.X1, figure.Y1, figure.X2, figure.Y2) and WhichLineSide(x, y, figure.X1, figure.Y1, figure.X2, figure.Y2) == WhichLineSide(x, y, figure.X2, figure.Y2, figure.X0, figure.Y0):
                             self.grid[state].Set(x, y, figure.color)
+        elif isinstance(figure, Chain):
+            for i in range(1, len(figure.P)):
+                self.DrawFigure(Line(figure.P[i-1].X, figure.P[i-1].Y, figure.P[i].X, figure.P[i].Y, figure.color))
     def Draw(self, state = None):
         if state == None and self.state != None:
             for i in range(self.dim.H):
