@@ -24,7 +24,7 @@ d.Draw()                        # Draw the current state to the terminal.
 
 Here's the output of the above code:
 
-[Imgur](https://imgur.com/m9Fd6xy)
+![Imgur](https://imgur.com/m9Fd6xy)
 
 ### Documentation
 
@@ -71,4 +71,4 @@ d.Draw()
 
 This gives the following output:
 
-[Imgur](https://imgur.com/UwwWJRc)
+![Imgur](https://imgur.com/UwwWJRc)
