@@ -1,13 +1,13 @@
 import subprocess
-import bashcolor as bc
+from termcolor import cprint
 from math import floor, ceil
+from Color_Console import ctext
+from terminalsize import get_terminal_size
 
 LEFT = 0
 CENTER = 1
 RIGHT = 2
 
-def GetTerminalSize():
-    return tuple(map(int, subprocess.check_output(['stty', 'size']).split()))
 
 def sign(x):
     return 1 if x > 0 else -1 if x < 0 else 0
@@ -16,12 +16,27 @@ def WhichLineSide(x, y, x0, y0, x1, y1):
     det = x*y0 + y*x1 + x0*y1 - x1*y0 - y1*x - x0*y
     return sign(det)
 
+colors = [
+        'black',
+        'grey',
+        'red',
+        'green',
+        'yellow',
+        'blue',
+        'magenta',
+        'cyan',
+        'white'
+        ]
+
 if __name__ == '__main__':
     print('This is a module!')
+
+ctext('') # For some reason colors in windows terminal don't work until I've called ctext() at least once, so here it is, unfortunately
+
 class Figure:
     def __init__(self, color = 'black'):
-        if color not in Display.color or color[1:] == 'bg':
-            raise ValueError('\'color\' must be one of these values: \'white\', \'red\', \'green\', \'blue\', \'yellow\', \'violet\', \'beige\', \'gray\', \'black\'.')
+        if color not in colors:
+            raise ValueError('\'color\' must be one of these values: \'white\', \'red\', \'green\', \'blue\', \'yellow\', \'magenta\', \'cyan\', \'grey\', \'black\'.')
         self.color = color
 class Rectangle(Figure):
     def __init__(self, x, y, w, h, color = 'black', fill = False):
@@ -159,36 +174,16 @@ class Display:
                 raise TypeError('\'val\' must be a part of the \'values\' collection: {}'.format(self.__values))
         def __getitem__(self, key):
             return tuple(self._grid[key]) # tuple because this needs to be read-only
-    color = {
-        'white' : bc.Color.CWHITE,
-        'red'   : bc.Color.CRED,
-        'green' : bc.Color.CGREEN,
-        'blue'  : bc.Color.CBLUE,
-        'yellow': bc.Color.CYELLOW,
-        'violet': bc.Color.CVIOLET,
-        'beige' : bc.Color.CBEIGE,
-        'gray'  : bc.Color.CGREY,
-        'black' : bc.Color.CBLACK,
-        'whitebg' : bc.Color.CWHITEBG,
-        'redbg'   : bc.Color.CREDBG,
-        'greenbg' : bc.Color.CGREENBG,
-        'bluebg'  : bc.Color.CBLUEBG,
-        'yellowbg': bc.Color.CYELLOWBG,
-        'violetbg': bc.Color.CVIOLETBG,
-        'beigebg' : bc.Color.CBEIGEBG,
-        'graybg'  : bc.Color.CGREYBG,
-        'blackbg' : bc.Color.CBLACKBG,
-    }
     def __init__(self, w, h, align = LEFT):
-        rows, cols = GetTerminalSize()
+        cols, rows = get_terminal_size()
         if w * 2 > cols or h + 1 > rows:
-            raise ValueError('The given width and height are too big. Please resize your terminal or stick to these dimensions: {}x{}.'.format(cols * 2, rows + 1))
+            raise ValueError('The given width and height are too big. Please resize your terminal or stick to these dimensions: {}x{}.'.format(cols // 2, rows + 1))
         self.dim = Rectangle(0, 0, w, h)
         self.align = align
         self.grid = {}
         self.state = None
     def NewState(self, state, fill='black'):
-        self.grid[state] = self.Grid(self.dim.W, self.dim.H, fill, tuple(k for k,v in self.color.items()))
+        self.grid[state] = self.Grid(self.dim.W, self.dim.H, fill, tuple(colors))
     def SetState(self, state):
         if state in self.grid:
             self.state = state
@@ -291,24 +286,32 @@ class Display:
         if state == None and self.state != None:
             for i in range(self.dim.H):
                 if self.align == CENTER:
-                    for j in range((GetTerminalSize()[1] // 2 - self.dim.W) // 2):
-                        bc.printbc('  ', self.color['black'], self.color['blackbg'], end = '')
+                    for j in range((get_terminal_size()[0] // 2 - self.dim.W) // 2):
+                        print('  ', end='')
                 elif self.align == RIGHT:
-                    for j in range(GetTerminalSize()[1] // 2 - self.dim.W):
-                        bc.printbc('  ', self.color['black'], self.color['blackbg'], end= '')
+                    for j in range(get_terminal_size()[0] // 2 - self.dim.W):
+                        print('  ', end='')
                 for j in range(self.dim.W):
-                    bc.printbc('  ', self.color[self.grid[self.state].Get(j, i)], self.color[self.grid[self.state].Get(j, i) + 'bg'], end='')
+                    col = self.grid[self.state].Get(j, i)
+                    if col != 'black':
+                        cprint('  ', col, 'on_' + self.grid[self.state].Get(j, i), end='')
+                    else:
+                        print('  ', end='')
                 print('')
         elif state != None:
             for i in range(self.dim.H):
                 if self.align == CENTER:
-                    for j in range((GetTerminalSize()[1] // 2 - self.dim.W) // 2):
-                        bc.printbc('  ', self.color['black'], self.color['blackbg'], end = '')
+                    for j in range((get_terminal_size()[0] // 2 - self.dim.W) // 2):
+                        print('  ', end='')
                 elif self.align == RIGHT:
-                    for j in range(GetTerminalSize()[1] // 2 - self.dim.W):
-                        bc.printbc('  ', self.color['black'], self.color['blackbg'], end= '')
+                    for j in range(get_terminal_size()[0] // 2 - self.dim.W):
+                        print('  ', end='')
                 for j in range(self.dim.W):
-                    bc.printbc('  ', self.color[self.grid[state].Get(j, i)], self.color[self.grid[state].Get(j, i) + 'bg'], end='')
+                    col = self.grid[state].Get(j, i)
+                    if col != 'black':
+                        cprint('  ', col, 'on_' + self.grid[state].Get(j, i), end='')
+                    else:
+                        print('  ', end='')
                 print('')
         else:
             raise ValueError('Must specify \'state\' parameter if \'SetState()\' had not been invoked before.')
