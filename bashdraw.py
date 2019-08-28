@@ -34,12 +34,12 @@ if __name__ == '__main__':
 ctext('') # For some reason colors in windows terminal don't work until I've called ctext() at least once, so here it is, unfortunately
 
 class Figure:
-    def __init__(self, color = 'black'):
+    def __init__(self, color = 'white'):
         if color not in colors:
             raise ValueError('\'color\' must be one of these values: \'white\', \'red\', \'green\', \'blue\', \'yellow\', \'magenta\', \'cyan\', \'grey\', \'black\'.')
         self.color = color
 class Rectangle(Figure):
-    def __init__(self, x, y, w, h, color = 'black', fill = False):
+    def __init__(self, x, y, w, h, color = 'white', fill = False):
         Figure.__init__(self, color)
         self.X = x
         self.Y = y
@@ -47,10 +47,10 @@ class Rectangle(Figure):
         self.H = h
         self.fill = fill
     @classmethod
-    def FromPoints(cls, a, b, color = 'black', fill = False):
+    def FromPoints(cls, a, b, color = 'white', fill = False):
         return cls(a.X, b.X, b.X - a.X, b.Y - a.Y, color, fill)
 class Point(Figure):
-    def __init__(self, x, y, color = 'black'):
+    def __init__(self, x, y, color = 'white'):
         Figure.__init__(self, color)
         self.X = x
         self.Y = y
@@ -62,7 +62,7 @@ class Point(Figure):
         return self.X if key == 0 else self.Y
 
 class Line(Figure):
-    def __init__(self, x0, y0, x1, y1, color = 'black'):
+    def __init__(self, x0, y0, x1, y1, color = 'white'):
         Figure.__init__(self, color)
         if x0 != x1:
             self.slope = Line.Slope(x0, y0, x1, y1)
@@ -106,7 +106,7 @@ class Line(Figure):
                 self.Y1 = y0
        
     @classmethod
-    def FromPoints(cls, a, b, color = 'black'):
+    def FromPoints(cls, a, b, color = 'white'):
         if a.X <= b.X:
             return cls(a.X, a.Y, b.X, b.Y, color)
         else:
@@ -116,7 +116,7 @@ class Line(Figure):
         return (y1 - y0) / (x1 - x0)
 
 class Triangle(Figure):
-    def __init__(self, x0, y0, x1, y1, x2, y2, fill = True, color = 'black'):
+    def __init__(self, x0, y0, x1, y1, x2, y2, color = 'white', fill = False):
         Figure.__init__(self, color)
         self.X0 = x0
         self.Y0 = y0
@@ -126,7 +126,7 @@ class Triangle(Figure):
         self.Y2 = y2
         self.fill = fill
     @classmethod
-    def FromPoints(cls, a, b, c, fill = True, color = 'black'):
+    def FromPoints(cls, a, b, c, fill = True, color = 'white'):
         return cls(a.X, a.Y, b.X, b.Y, c.X, c.Y, fill, color)
 class Chain(Figure):
     def __init__(self, *args):
