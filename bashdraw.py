@@ -143,7 +143,14 @@ class Chain(Figure):
         return self.P[key]
 
 class Spline(Chain):
-    pass
+    BEZIER = 0
+    CATMULL_ROM = 1
+    def __init__(self, stype, *args):
+        if isinstance(stype, int):
+            Chain.__init__(self, *args)
+            self.stype = stype
+        else:
+            raise ValueError('The first parameter must be the spline type! (Spline.BEZIER or Spline.CATMULL_ROM)')
 
 class Display:
     class Grid:
@@ -240,43 +247,72 @@ class Display:
                 for i in range(1, len(figure.P)):
                     self.DrawFigure(Line(figure.P[i-1].X, figure.P[i-1].Y, figure.P[i].X, figure.P[i].Y, figure.color), state)
             else:
-                def interp(a, b, t):
-                    return a + (b - a) * t
-                def samecoords(p1, p2):
-                    return p1.X == p2.X and p1.Y == p2.Y
-                def adjacent(p1, p2):
-                    if abs(p1.X - p2.X) == 1 and p1.Y == p2.Y:
-                        return 1
-                    elif abs(p1.Y - p2.Y) == 1 and p1.X == p2.X:
-                        return 2
-                    else:
-                        return 0
-                steps = self.dim.H * self.dim.W
-                lastPoint = None
-                lastPoint2 = None
-                for i in range(steps + 1):
-                    i = i / steps
-                    P = figure.P
-                    while len(P) > 2:
-                        P2 = []
-                        for j in range(len(P) - 1):
-                            x = interp(P[j].X, P[j+1].X, i)
-                            y = interp(P[j].Y, P[j+1].Y, i)
-                            P2.append(Point(x, y))
-                        P = P2
-                    x = round(interp(P[0].X, P[1].X, i))
-                    y = round(interp(P[0].Y, P[1].Y, i))
-
-                    # Pixel perfect drawing (compute whether or not delete the previous pixel)
-                    if lastPoint != None and lastPoint2 != None and not samecoords(lastPoint, lastPoint2) and not samecoords(Point(x, y), lastPoint):
-                        if adjacent(Point(x, y), lastPoint) + adjacent(lastPoint, lastPoint2) == 3:
+                # This function will erase the last drawn point if the last 3 points form an L shape (simple pixel-perfect algorithm)
+                def computepixelperfect(curPoint, lastPoint, lastPoint2):
+                    def samecoords(p1, p2):
+                        return p1.X == p2.X and p1.Y == p2.Y
+                    def adjacent(p1, p2):
+                        if abs(p1.X - p2.X) == 1 and p1.Y == p2.Y:
+                            return 1
+                        elif abs(p1.Y - p2.Y) == 1 and p1.X == p2.X:
+                            return 2
+                        else:
+                            return 0
+                    if lastPoint != None and lastPoint2 != None and not samecoords(lastPoint, lastPoint2) and not samecoords(curPoint, lastPoint):
+                        if adjacent(curPoint, lastPoint) + adjacent(lastPoint, lastPoint2) == 3:
                             self.DrawFigure(lastPoint, state)
                             lastPoint = None
-                    if lastPoint == None or not samecoords(Point(x, y), lastPoint):
+                    if lastPoint == None or not samecoords(curPoint, lastPoint):
                         if lastPoint2 == None or (lastPoint != None and not samecoords(lastPoint2, lastPoint)):
                             lastPoint2 = lastPoint
                         lastPoint = Point(x, y, self.grid[state].Get(x, y))
-                    self.DrawFigure(Point(x, y, figure.color), state)
+                    return lastPoint, lastPoint2
+
+                lastPoint = None
+                lastPoint2 = None
+                if figure.stype == Spline.BEZIER:
+                    def interp(a, b, t):
+                        return a + (b - a) * t
+                    steps = self.dim.H * self.dim.W
+                    for i in range(steps + 1):
+                        i = i / steps
+                        P = figure.P
+                        while len(P) > 2:
+                            P2 = []
+                            for j in range(len(P) - 1):
+                                x = interp(P[j].X, P[j+1].X, i)
+                                y = interp(P[j].Y, P[j+1].Y, i)
+                                P2.append(Point(x, y))
+                            P = P2
+                        x = round(interp(P[0].X, P[1].X, i))
+                        y = round(interp(P[0].Y, P[1].Y, i))
+
+                        lastPoint, lastPoint2 = computepixelperfect(Point(x, y), lastPoint, lastPoint2)
+                        self.DrawFigure(Point(x, y, figure.color), state)
+                elif figure.stype == Spline.CATMULL_ROM:
+                    steps = self.dim.H * self.dim.W
+                    for i in range(steps + 1):
+                        i = i / steps
+
+                        p1 = int(i) + 1
+                        p2 = p1 + 1
+                        p3 = p2 + 1
+                        p0 = p1 - 1
+
+                        ii = i * i
+                        iii = ii * i
+
+                        q1 = (-3 * ii) + (4  * i) - 1
+                        q2 = (+9 * ii) - (10 * i)
+                        q3 = (-9 * ii) + (8  * i) + 1
+                        q4 = (+3 * ii) - (2  * i)
+
+                        x = round(0.5 * ((figure.P[0].X * q1) + (figure.P[1].X * q2) + (figure.P[2].X * q3) + (figure.P[3].X * q4)))
+                        y = round(0.5 * ((figure.P[0].Y * q1) + (figure.P[1].Y * q2) + (figure.P[2].Y * q3) + (figure.P[3].Y * q4)))
+
+                        if x in range(0, self.dim.W) and y in range(0, self.dim.H):
+                            lastPoint, lastPoint2 = computepixelperfect(Point(x, y), lastPoint, lastPoint2)
+                            self.DrawFigure(Point(x, y, figure.color), state)
     def Draw(self, state = None):
         if state == None and self.state != None:
             for i in range(self.dim.H):
