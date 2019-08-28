@@ -1,3 +1,8 @@
+# Visualization Source Code
+# =========================
+# Use 1, 2, 3, 4, 5 keys to select different control points.
+# Use h, j, k, l to move the points around and observe the changes in the spline.
+
 from os import system
 import bashdraw as bd
 import keyboard
