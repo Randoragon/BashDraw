@@ -1,4 +1,3 @@
-import subprocess
 from termcolor import cprint
 from math import floor, ceil
 from Color_Console import ctext
@@ -136,7 +135,7 @@ class Chain(Figure):
             Figure.__init__(self, args[-1])
             args = args[:-1]
         else:
-            Figure.__init__(self, 'black')
+            Figure.__init__(self, 'white')
         self.P = []
         for i in args:
             self.P.append(i)
@@ -243,10 +242,6 @@ class Display:
             else:
                 def interp(a, b, t):
                     return a + (b - a) * t
-                def wrapX(p1, p2, p3, t):
-                    return interp(interp(p1.X, p2.X, t), interp(p2.X, p3.X, t), t)
-                def wrapY(p1, p2, p3, t):
-                    return interp(interp(p1.Y, p2.Y, t), interp(p2.Y, p3.Y, t), t)
                 def samecoords(p1, p2):
                     return p1.X == p2.X and p1.Y == p2.Y
                 def adjacent(p1, p2):

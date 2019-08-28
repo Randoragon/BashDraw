@@ -26,9 +26,9 @@ Here's the output of the above code:
 
 ![Imgur](https://i.imgur.com/m9Fd6xy.png)
 
-### Documentation
+### Documentation (v1.0.0)
 
-#### Available Figures (v1.0.0)
+#### Available Figures
 
 1. Point(x, y, color = 'white')
 2. Rectangle(x0, y0, width, height, fill = False, color = 'white') **OR** Rectangle.FromPoints(p0, p1, fill = False, color = 'white')
@@ -39,6 +39,20 @@ Here's the output of the above code:
 
 - ``x, y`` parameters refer to integer x and y position of the display.
 - ``p0, p1`` parameters refer to Point objects.
+
+#### Available Colors
+
+The following colors are accepted as parameters, but whether or not some of them display properly will depend on your OS and CLI:
+
+- 'white'
+- 'red'
+- 'green'
+- 'blue'
+- 'yellow'
+- 'magenta'
+- 'cyan'
+- 'grey'
+- 'black'
 
 #### Horizontal Alignment
 
@@ -51,6 +65,19 @@ d = bd.Display(10, 10, bd.LEFT)     # This is the default setting
 d = bd.Display(10, 10, bd.CENTER)
 d = bd.Display(10, 10, bd.RIGHT)
 ```
+
+#### Dependencies
+
+You will need these modules installed with Python 3:
+
+- termcolor
+- colorama
+- Color_Console
+- math
+- shlex
+- struct
+- platform
+- subprocess
 
 ### Example 2
 
