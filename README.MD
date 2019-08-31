@@ -35,7 +35,7 @@ Here's the output of the above code:
 3. Line(x0, y0, x1, y1, color = 'white') **OR** Line.FromPoints(p0, p1, color = 'white')
 4. Triangle(x0, y0, x1, y1, x2, y2, fill = True, color = 'white') **OR** Triangle.FromPoints(p0, p1, p2, fill = True, color = 'white')
 4. Chain(p0, p1, ..., pn, color = 'white') - this draws a serie of connected Lines
-5. Spline(p0, p1, ..., pn, color = 'white') - this draws a Bézier curve
+5. Spline(type, p0, p1, ..., pn, color = 'white') - type can be either Spline.BEZIER or Spline.CATMULL_ROM
 
 - ``x, y`` parameters refer to integer x and y position of the display.
 - ``p0, p1`` parameters refer to Point objects.
@@ -89,7 +89,7 @@ d.NewState(0)
 d.SetState(0)
 
 d.DrawFigure(bd.Rectangle(0, 0, 20, 20, 'yellow', True))
-d.DrawFigure(bd.Spline(bd.Point(4, 14), bd.Point(7, 16), bd.Point(13, 15), bd.Point(16, 11), 'red'))
+d.DrawFigure(bd.Spline(bd.Spline.BEZIER, bd.Point(4, 14), bd.Point(7, 16), bd.Point(13, 15), bd.Point(16, 11), 'red'))
 d.DrawFigure(bd.Line(6, 5, 6, 7, 'cyan'))
 d.DrawFigure(bd.Line(13, 5, 13, 7, 'cyan'))
 

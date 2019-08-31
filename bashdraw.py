@@ -290,29 +290,26 @@ class Display:
                         lastPoint, lastPoint2 = computepixelperfect(Point(x, y), lastPoint, lastPoint2)
                         self.DrawFigure(Point(x, y, figure.color), state)
                 elif figure.stype == Spline.CATMULL_ROM:
-                    steps = self.dim.H * self.dim.W
-                    for i in range(steps + 1):
-                        i = i / steps
+                    for j in range(1, len(figure.P) - 2):
+                        steps = 2 * (self.dim.H + self.dim.W)
+                        for i in range(steps + 1):
+                            # Credit: https://www.youtube.com/watch?v=9_aJGUTePYo
+                            i = i / steps
 
-                        p1 = int(i) + 1
-                        p2 = p1 + 1
-                        p3 = p2 + 1
-                        p0 = p1 - 1
+                            ii = i * i
+                            iii = ii * i
 
-                        ii = i * i
-                        iii = ii * i
+                            q1 = -iii + 2*ii - i
+                            q2 = 3*iii - 5*ii + 2
+                            q3 = -3*iii + 4*ii + i
+                            q4 = iii - ii
 
-                        q1 = (-3 * ii) + (4  * i) - 1
-                        q2 = (+9 * ii) - (10 * i)
-                        q3 = (-9 * ii) + (8  * i) + 1
-                        q4 = (+3 * ii) - (2  * i)
+                            x = round(0.5 * ((figure.P[j-1].X * q1) + (figure.P[j].X * q2) + (figure.P[j+1].X * q3) + (figure.P[j+2].X * q4)))
+                            y = round(0.5 * ((figure.P[j-1].Y * q1) + (figure.P[j].Y * q2) + (figure.P[j+1].Y * q3) + (figure.P[j+2].Y * q4)))
 
-                        x = round(0.5 * ((figure.P[0].X * q1) + (figure.P[1].X * q2) + (figure.P[2].X * q3) + (figure.P[3].X * q4)))
-                        y = round(0.5 * ((figure.P[0].Y * q1) + (figure.P[1].Y * q2) + (figure.P[2].Y * q3) + (figure.P[3].Y * q4)))
-
-                        if x in range(0, self.dim.W) and y in range(0, self.dim.H):
-                            lastPoint, lastPoint2 = computepixelperfect(Point(x, y), lastPoint, lastPoint2)
-                            self.DrawFigure(Point(x, y, figure.color), state)
+                            if x in range(0, self.dim.W) and y in range(0, self.dim.H):
+                                lastPoint, lastPoint2 = computepixelperfect(Point(x, y), lastPoint, lastPoint2)
+                                self.DrawFigure(Point(x, y, figure.color), state)
     def Draw(self, state = None):
         if state == None and self.state != None:
             for i in range(self.dim.H):

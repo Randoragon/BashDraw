@@ -6,8 +6,9 @@
 from os import system
 import bashdraw as bd
 import keyboard
+from random import randint
 
-g = bd.Display(21, 21, bd.LEFT)
+g = bd.Display(50, 50, bd.LEFT)
 g.NewState('A')
 g.SetState('A')
 # g.DrawFigure(bd.Rectangle(0, 0, 21, 21, 'blue'))
@@ -41,13 +42,21 @@ def setsel(val):
     p[sel] = bd.Point(p[sel].X, p[sel].Y, 'yellow')
     redraw()
     return True
-p = [bd.Point(1, 1, 'yellow'), bd.Point(8, 20, 'cyan'), bd.Point(12, 3, 'cyan'), bd.Point(15, 15, 'cyan'), bd.Point(18, 18, 'cyan')]
+p = []
+for i in range(10):
+    p.append(bd.Point(randint(0, g.dim.W - 1), randint(0, g.dim.H - 1), 'cyan'))
+p[0].color = 'cyan'
 sel = 0
 keyboard.add_hotkey('1', lambda: setsel(0))
 keyboard.add_hotkey('2', lambda: setsel(1))
 keyboard.add_hotkey('3', lambda: setsel(2))
 keyboard.add_hotkey('4', lambda: setsel(3))
 keyboard.add_hotkey('5', lambda: setsel(4))
+keyboard.add_hotkey('6', lambda: setsel(5))
+keyboard.add_hotkey('7', lambda: setsel(6))
+keyboard.add_hotkey('8', lambda: setsel(7))
+keyboard.add_hotkey('9', lambda: setsel(8))
+keyboard.add_hotkey('0', lambda: setsel(9))
 keyboard.add_hotkey('h', lambda: addX(p[sel], -1))
 keyboard.add_hotkey('j', lambda: addY(p[sel], 1))
 keyboard.add_hotkey('k', lambda: addY(p[sel], -1))
@@ -55,12 +64,9 @@ keyboard.add_hotkey('l', lambda: addX(p[sel], 1))
 def redraw():
     g.Clear()
     g.DrawFigure(bd.Rectangle(0, 0, g.dim.W, g.dim.H, 'grey'))
-    g.DrawFigure(bd.Spline(bd.Spline.CATMULL_ROM, p[0], p[1], p[2], p[3], 'red'))
-    g.DrawFigure(p[0])
-    g.DrawFigure(p[1])
-    g.DrawFigure(p[2])
-    g.DrawFigure(p[3])
-    g.DrawFigure(p[4])
+    g.DrawFigure(bd.Spline(bd.Spline.CATMULL_ROM, p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8], p[9], 'red'))
+    for i in range(10):
+        g.DrawFigure(p[i])
     system('clear')
     g.Draw()
 redraw()
